@@ -1,26 +1,26 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
+	"time"
 
-	"./models"
 	"./controllers"
-
-	_ "github.com/go-chi/chi"
-)
-
-const (
-    dbName = "go-truora"
-    dbHost = "localhost"
-    dbPort = "33066"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 func main() {
 	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.URLFormat)
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/servers", controllers.Records)
+	r.Get("/{domain}", controllers.Whois)
+
 	http.ListenAndServe(":3000", r)
 }
