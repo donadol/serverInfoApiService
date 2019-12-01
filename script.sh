@@ -1,6 +1,6 @@
 go get -u github.com/lib/pq
-
 go get -u github.com/go-chi/chi
+go get github.com/PuerkitoBio/goquery
 
 cockroach start-single-node \
 --insecure \
