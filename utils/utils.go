@@ -1,4 +1,3 @@
-// taken from https://gist.github.com/chmike/d4126a3247a6d9a70922fc0e8b4f4013
 package utils
 
 import (
@@ -6,6 +5,16 @@ import (
 	"unicode/utf8"
 )
 
+func IndexOf(e string, data []string) (int) {
+    for k, v := range data {
+        if e == v {
+            return k
+        }
+    }
+    return -1
+}
+
+// taken from https://gist.github.com/chmike/d4126a3247a6d9a70922fc0e8b4f4013
 func CheckDomain(name string) error {
 	fmt.Println(name)
 	if len(name) == 0{
