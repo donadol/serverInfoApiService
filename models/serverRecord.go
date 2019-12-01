@@ -1,6 +1,6 @@
 package models
 
-type Record struct {
+type ServerRecord struct {
 	Items []Item `json:"items"`
 }
 
