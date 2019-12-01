@@ -9,7 +9,7 @@ import (
 	"../models"
 )
 
-func Whois(domain string, w http.ResponseWriter) models.Domain {
+func WhoIs(domain string) models.Domain {
 	response, err := http.Get("http://ip-api.com/json/" + domain)
 	if err != nil {
         fmt.Printf("The HTTP request failed with error %s\n", err)

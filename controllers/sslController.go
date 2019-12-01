@@ -9,7 +9,7 @@ import (
 	"../models"
 )
 
-func Ssl(domain string, w http.ResponseWriter) models.Host {
+func Ssl(domain string) models.Host {
 	response, err := http.Get("https://api.ssllabs.com/api/v3/analyze?host=" + domain)
 	if err != nil {
         fmt.Printf("The HTTP request failed with error %s\n", err)
