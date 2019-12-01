@@ -1,6 +1,6 @@
 package models
 
-type Domain struct {
+type InfoServer struct {
 	ServersChanged bool `json:"servers_changed"`
 	MinGrade string `json:"ssl_grade"`
 	PreviousMinGrade string `json:"previous_ssl_grade"`
