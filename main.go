@@ -20,7 +20,7 @@ func main() {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Get("/servers", controllers.Records)
-	r.Get("/{domain}", controllers.Whois)
+	r.Get("/{domain}", controllers.InfoDomain)
 
 	http.ListenAndServe(":3000", r)
 }
