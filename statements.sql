@@ -9,7 +9,7 @@ USE serversinfo;
 CREATE TABLE IF NOT EXISTS DOMAIN (
   id SERIAL,
   consulted_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-  host VARCHAR(45) NOT NULL,
+  host TEXT NOT NULL,
   PRIMARY KEY (id));
 
 CREATE TABLE IF NOT EXISTS INFOSERVER (
@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS INFOSERVER (
   servers_changed BOOLEAN NOT NULL,
   ssl_grade VARCHAR(3) NOT NULL,
   previous_ssl_grade VARCHAR(3) NOT NULL,
-  logo VARCHAR(45) NOT NULL,
-  title VARCHAR(45) NOT NULL,
+  logo TEXT NOT NULL,
+  title TEXT NOT NULL,
   is_down BOOLEAN NOT NULL,
   domain_id INT NOT NULL,
   PRIMARY KEY (id),
@@ -31,10 +31,10 @@ CREATE TABLE IF NOT EXISTS INFOSERVER (
 
 CREATE TABLE IF NOT EXISTS SERVER (
   id SERIAL,
-  address VARCHAR(45) NOT NULL,
+  address TEXT NOT NULL,
   ssl_grade VARCHAR(3) NOT NULL,
   country VARCHAR(5) NOT NULL,
-  owner VARCHAR(45) NOT NULL,
+  owner TEXT NOT NULL,
   infoserver_id INT NOT NULL,
   PRIMARY KEY (id),
   INDEX infoserver_id_idx (infoserver_id ASC),
