@@ -17,7 +17,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	//r.Get("/servers", controllers.InfoServers)
+	r.Get("/servers", controllers.InfoServers)
 	r.Get("/{domain}", controllers.InfoDomain)
 
 	http.ListenAndServe(":3000", r)
