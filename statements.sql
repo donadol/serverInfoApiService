@@ -1,28 +1,28 @@
 CREATE USER IF NOT EXISTS maxroach;
 
-CREATE DATABASE serversInfo;
+CREATE DATABASE IF NOT EXISTS serversInfo;
 
 GRANT ALL ON DATABASE serversInfo TO maxroach;
 
 USE serversinfo;
 
 CREATE TABLE IF NOT EXISTS DOMAIN (
-  id INT NOT NULL AUTO_INCREMENT,
-  last_consult DATETIME NOT NULL,
-  host VARCHAR(45) COLLATE 'DEFAULT' NOT NULL,
+  id SERIAL,
+  consulted_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  host VARCHAR(45) NOT NULL,
   PRIMARY KEY (id));
 
 CREATE TABLE IF NOT EXISTS INFOSERVER (
-  id INT NOT NULL AUTO_INCREMENT,
-  servers_changed BINARY(1) NOT NULL,
+  id SERIAL,
+  servers_changed BOOLEAN NOT NULL,
   ssl_grade VARCHAR(3) NOT NULL,
   previous_ssl_grade VARCHAR(3) NOT NULL,
   logo VARCHAR(45) NOT NULL,
   title VARCHAR(45) NOT NULL,
-  is_down BINARY(1) NOT NULL,
+  is_down BOOLEAN NOT NULL,
   domain_id INT NOT NULL,
   PRIMARY KEY (id),
-  INDEX domain_id_idx (domain_id ASC) VISIBLE,
+  INDEX domain_id_idx (domain_id ASC),
   CONSTRAINT domain_id
     FOREIGN KEY (domain_id)
     REFERENCES domain (id)
@@ -30,14 +30,14 @@ CREATE TABLE IF NOT EXISTS INFOSERVER (
     ON UPDATE CASCADE);
 
 CREATE TABLE IF NOT EXISTS SERVER (
-  id INT NOT NULL AUTO_INCREMENT,
+  id SERIAL,
   address VARCHAR(45) NOT NULL,
   ssl_grade VARCHAR(3) NOT NULL,
   country VARCHAR(5) NOT NULL,
   owner VARCHAR(45) NOT NULL,
   infoserver_id INT NOT NULL,
   PRIMARY KEY (id),
-  INDEX infoserver_id_idx (infoserver_id ASC) VISIBLE,
+  INDEX infoserver_id_idx (infoserver_id ASC),
   CONSTRAINT infoserver_id
     FOREIGN KEY (infoserver_id)
     REFERENCES infoServer (id)
