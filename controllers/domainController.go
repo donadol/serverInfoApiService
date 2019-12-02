@@ -3,7 +3,6 @@ package controllers
 import(
 	"encoding/json"
 	"log"
-	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -88,5 +87,6 @@ func InfoDomain(w http.ResponseWriter, r *http.Request){
 	if err != nil {
         log.Fatal("Error marshaling. ", err)
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
 }
