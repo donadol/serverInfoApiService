@@ -6,6 +6,6 @@ type InfoServer struct {
 	PreviousMinGrade string `json:"previous_ssl_grade"`
 	Logo string `json:"logo"`
 	Title string `json:"title"`
-	IsDown string `json:"is_down"`
+	IsDown bool `json:"is_down"`
 	Servers []Server `json:"servers"`
 }
