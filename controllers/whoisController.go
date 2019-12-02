@@ -2,7 +2,8 @@ package controllers
 
 import (
     "encoding/json"
-    "fmt"
+	"log"
+	//"fmt"
     "io/ioutil"
     "net/http"
 
@@ -12,7 +13,7 @@ import (
 func WhoIs(domain string) models.Domain {
 	response, err := http.Get("http://ip-api.com/json/" + domain)
 	if err != nil {
-        fmt.Printf("The HTTP request failed with error %s\n", err)
+        log.Fatal("The HTTP request failed with error %s\n", err)
     } else {
         data, _ := ioutil.ReadAll(response.Body)
         //fmt.Println(string(data))

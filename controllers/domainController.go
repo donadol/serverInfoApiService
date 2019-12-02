@@ -1,56 +1,55 @@
-package controller
+package controllers
 
 import(
 	"encoding/json"
 	"log"
+	"fmt"
 	"net/http"
 	"reflect"
-	"regexp"
 	"strings"
-	"time"
 
 	"../models"
 	"../utils"
-	_ "github.com/go-chi/chi"
-    _ "github.com/PuerkitoBio/goquery"
+	"github.com/go-chi/chi"
+    "github.com/PuerkitoBio/goquery"
 )
 
 func InfoDomain(w http.ResponseWriter, r *http.Request){
 	name := strings.ToLower(chi.URLParam(r, "domain"))
 	
 	err := utils.CheckDomain(name)
-	if err == nil{
+	if err != nil{
 		log.Fatal(err)
-		panic(nil)
 	}
 
-	host := Ssl(name, w)
+	host := Ssl(name)
 
-	infoServer := models.infoServer{}
-	infoServer.Servers := []models.Server{}
-	MinGrade = -2
+	infoServer := models.InfoServer{}
+	serversAux := []models.Server{}
+	MinGrade := 0
 
 	grades := []string{"F-", "F", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"}
 	
 	for _, endpoint := range host.Endpoints {
-		domain := WhoIs(endpoint.IpAddress, w)
+		domain := WhoIs(endpoint.IpAddress)
 		aux := models.Server{}
 		aux.Address = endpoint.IpAddress
 		aux.Grade = endpoint.Grade
-		index := utils.IndexOf(endpoint.Grade, grades)
-		if index < MinGrade {
-			grade = i
+		for k, v := range grades {
+			if v == endpoint.Grade && (k < MinGrade || MinGrade == 0) {
+				MinGrade = k
+			}
 		}
 		aux.Country = domain.CountryCode
 		aux.Owner = domain.Org
-		infoServer.Servers.append(infoServer.Servers, aux)
+		serversAux = append(serversAux, aux)
 	}
-	infoServer.MinGrade := grades[MinGrade]
+	infoServer.Servers = serversAux
+	infoServer.MinGrade = grades[MinGrade]
 	
-    response, err := http.Get(name)
+    response, err := http.Get("http://"+name)
     if err != nil {
         log.Fatal(err)
-		panic(nil)
     }
 	defer response.Body.Close()
 	
@@ -59,22 +58,22 @@ func InfoDomain(w http.ResponseWriter, r *http.Request){
         log.Fatal("Error loading HTTP response body. ", err)
     }
 
-	infoServer.Title := document.Find("title").Text()
-	infoServer.Logo := ""
+	infoServer.Title = document.Find("title").Text()
+	infoServer.Logo = ""
 	document.Find("link").Each(func(index int, element *goquery.Selection) {
         rel, exists := element.Attr("rel")
         if exists && (rel == "shortcut icon" ||  rel == "icon") {
 			href, exists1 := element.Attr("href")
 			if exists1{
-				infoServer.Logo := href
+				infoServer.Logo = href
 			}
         }
 	})
 
-	infoServer.PreviousMinGrade := infoServer.MinGrade
+	infoServer.PreviousMinGrade = infoServer.MinGrade
 	previous := FindPreviousGrade(name)
 	if previous != "" {
-		infoServer.PreviousMinGrade := previous
+		infoServer.PreviousMinGrade = previous
 	}
 	
 	infoServer.IsDown = false
