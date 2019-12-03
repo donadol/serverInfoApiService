@@ -52,13 +52,15 @@ func InfoDomain(w http.ResponseWriter, r *http.Request) {
 
 	response, err := http.Get("http://" + name)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	defer response.Body.Close()
 
 	document, err := goquery.NewDocumentFromReader(response.Body)
 	if err != nil {
-		log.Fatal("Error loading HTTP response body. ", err)
+		log.Println("Error loading HTTP response body. ", err)
+		return
 	}
 
 	infoServer.Title = document.Find("title").Text()
@@ -89,7 +91,8 @@ func InfoDomain(w http.ResponseWriter, r *http.Request) {
 	Insert(name, infoServer)
 	res, err := json.Marshal(infoServer)
 	if err != nil {
-		log.Fatal("Error marshaling. ", err)
+		log.Println("Error marshaling. ", err)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
