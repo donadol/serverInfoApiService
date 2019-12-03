@@ -15,12 +15,14 @@ func Ssl(domain string) models.Host {
 	if err != nil {
         log.Fatal("The HTTP request failed with error %s\n", err)
     } else {
-        data, _ := ioutil.ReadAll(response.Body)
+		data, _ := ioutil.ReadAll(response.Body)
+		defer response.Body.Close()
         //fmt.Println(string(data))
 		host := models.Host{}
 		err = json.Unmarshal(data, &host)
 		//fmt.Printf("%+v", host)
 		return host
 	}
+	defer response.Body.Close()
 	return models.Host{}
 }
