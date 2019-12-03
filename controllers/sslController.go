@@ -13,7 +13,7 @@ import (
 func Ssl(domain string) models.Host {
 	response, err := http.Get("https://api.ssllabs.com/api/v3/analyze?host=" + domain)
 	if err != nil {
-        log.Fatal("The HTTP request failed with error %s\n", err)
+        log.Println("The HTTP request failed with error %s\n", err)
     } else {
 		data, _ := ioutil.ReadAll(response.Body)
 		defer response.Body.Close()

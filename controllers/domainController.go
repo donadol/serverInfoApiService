@@ -60,7 +60,6 @@ func InfoDomain(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Error loading HTTP response body. ", err)
 	}
-	defer response.Body.Close()
 
 	infoServer.Title = document.Find("title").Text()
 	infoServer.Logo = ""

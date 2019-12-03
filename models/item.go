@@ -2,5 +2,5 @@ package models
 
 type Item struct {
 	Domain     string     `json:"domain"`
-	InfoServer InfoServer `json:"infoservers"`
+	InfoServer InfoServer `json:"infoserver"`
 }
