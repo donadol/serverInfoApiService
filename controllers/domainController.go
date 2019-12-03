@@ -18,7 +18,7 @@ func InfoDomain(w http.ResponseWriter, r *http.Request) {
 
 	err := utils.CheckDomain(name)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	host := Ssl(name)
