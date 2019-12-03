@@ -21,8 +21,8 @@ func Insert(host string, info models.InfoServer) {
 	var id int64
 	err = stmt.QueryRow(host).Scan(&id)
 	if err != nil {
-        log.Fatal(err)
-    } else{
+		log.Fatal(err)
+	} else {
 		InsertInfoServer(info, id)
 	}
 	db.Close()
@@ -41,8 +41,8 @@ func InsertInfoServer(info models.InfoServer, id int64) {
 	var InfoServerId int64
 	err = stmt.QueryRow(info.ServersChanged, info.MinGrade, info.PreviousMinGrade, info.Logo, info.Title, info.IsDown, id).Scan(&InfoServerId)
 	if err != nil {
-        log.Fatal(err)
-    } else{
+		log.Fatal(err)
+	} else {
 		for _, server := range info.Servers {
 			InsertServer(server, InfoServerId)
 		}
@@ -60,15 +60,15 @@ func InsertServer(info models.Server, id int64) {
 		log.Fatal("Error inserting s: ", err)
 	}
 	defer stmt.Close()
-	
+
 	_, err = stmt.Exec(info.Address, info.Grade, info.Country, info.Owner, id)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 	db.Close()
 }
 
-func FindPreviousGrade(name string) (string){
+func FindPreviousGrade(name string) string {
 	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
 	if err != nil {
 		log.Fatal("Error connecting to the DB: ", err)
@@ -84,14 +84,14 @@ func FindPreviousGrade(name string) (string){
 	var ssl string
 	err = stmt.QueryRow(name).Scan(&ssl)
 	if err != nil {
-        log.Print("Error in query: ",err)
-		ssl=""
+		//log.Print("Error in query: ",err)
+		ssl = ""
 	}
 	db.Close()
 	return ssl
 }
 
-func FindPreviousServers(name string) ([]models.Server){
+func FindPreviousServers(name string) []models.Server {
 	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
 	if err != nil {
 		log.Fatal("Error connecting to the DB: ", err)
@@ -106,23 +106,23 @@ func FindPreviousServers(name string) ([]models.Server){
 	defer stmt.Close()
 	rows, err := stmt.Query(name)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer rows.Close()
 	servers := []models.Server{}
 	for rows.Next() {
 		var server models.Server
 		err = rows.Scan(&server.Address, &server.Grade, &server.Country, &server.Owner)
-        if err != nil {
-            log.Fatal(err)
-        }
-        servers = append(servers, server)
+		if err != nil {
+			log.Fatal(err)
+		}
+		servers = append(servers, server)
 	}
 	db.Close()
 	return servers
 }
 
-func FindServersRecords()(models.ServerRecord){
+func FindServersRecords() models.ServerRecord {
 	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
 	if err != nil {
 		log.Fatal("Error connecting to the DB: ", err)
@@ -137,7 +137,7 @@ func FindServersRecords()(models.ServerRecord){
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer rows.Close()
 	record := models.ServerRecord{}
@@ -147,18 +147,18 @@ func FindServersRecords()(models.ServerRecord){
 		var item models.Item
 		var id int64
 		err = rows.Scan(&item.Domain, &id)
-        if err != nil {
-            log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
 		}
-		item.InfoServers = FindHosts(id)
-        items = append(items, item)
+		item.InfoServer = FindHost(id)
+		items = append(items, item)
 	}
 	record.Items = items
 	db.Close()
 	return record
 }
 
-func FindHosts(id int64)([]models.InfoServer){
+func FindHost(id int64) models.InfoServer {
 	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
 	if err != nil {
 		log.Fatal("Error connecting to the DB: ", err)
@@ -170,28 +170,18 @@ func FindHosts(id int64)([]models.InfoServer){
 		log.Fatal("Error in select: ", err)
 	}
 	defer stmt.Close()
-	rows, err := stmt.Query(id)
+	var host models.InfoServer
+	var host_id int64
+	err = stmt.QueryRow(id).Scan(&host_id, &host.ServersChanged, &host.MinGrade, &host.PreviousMinGrade, &host.Logo, &host.Title, &host.IsDown)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
-	defer rows.Close()
-	hosts := []models.InfoServer{}
-
-	for rows.Next() {
-		var host models.InfoServer
-		var host_id int64
-		err = rows.Scan(&host_id, &host.ServersChanged, &host.MinGrade, &host.PreviousMinGrade, &host.Logo, &host.Title, &host.IsDown)
-        if err != nil {
-            log.Fatal(err)
-		}
-		host.Servers = FindServers(host_id)
-        hosts = append(hosts, host)
-	}
+	host.Servers = FindServers(host_id)
 	db.Close()
-	return hosts
+	return host
 }
 
-func FindServers(id int64)([]models.Server){
+func FindServers(id int64) []models.Server {
 	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
 	if err != nil {
 		log.Fatal("Error connecting to the DB: ", err)
@@ -205,7 +195,7 @@ func FindServers(id int64)([]models.Server){
 	defer stmt.Close()
 	rows, err := stmt.Query(id)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer rows.Close()
 	servers := []models.Server{}
@@ -213,10 +203,10 @@ func FindServers(id int64)([]models.Server){
 	for rows.Next() {
 		var server models.Server
 		err = rows.Scan(&server.Address, &server.Grade, &server.Country, &server.Owner)
-        if err != nil {
-            log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
 		}
-        servers = append(servers, server)
+		servers = append(servers, server)
 	}
 	db.Close()
 	return servers
