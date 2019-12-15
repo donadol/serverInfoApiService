@@ -1,28 +1,33 @@
 package controllers
 
 import (
-    "encoding/json"
+	"encoding/json"
 	"log"
 	//"fmt"
-    "io/ioutil"
-    "net/http"
+	"io/ioutil"
+	"net/http"
 
 	"../models"
 )
 
-func Ssl(domain string) models.Host {
+func Ssl(domain string) (models.Host, error) {
 	response, err := http.Get("https://api.ssllabs.com/api/v3/analyze?host=" + domain)
 	if err != nil {
-        log.Println("The HTTP request failed with error %s\n", err)
-    } else {
-		data, _ := ioutil.ReadAll(response.Body)
-		defer response.Body.Close()
-        //fmt.Println(string(data))
-		host := models.Host{}
-		err = json.Unmarshal(data, &host)
-		//fmt.Printf("%+v", host)
-		return host
+		log.Printf("The HTTP request failed with error %s\n", err)
+		return models.Host{}, err
 	}
 	defer response.Body.Close()
-	return models.Host{}
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return models.Host{}, err
+	}
+
+	host := models.Host{}
+	err = json.Unmarshal(data, &host)
+	if err != nil {
+		return models.Host{}, err
+	}
+
+	return host, nil
 }

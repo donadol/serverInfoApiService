@@ -13,36 +13,37 @@ import (
 	"github.com/go-chi/chi"
 )
 
+var grades = []string{"F-", "F", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"}
+
 func InfoDomain(w http.ResponseWriter, r *http.Request) {
 	name := strings.ToLower(chi.URLParam(r, "domain"))
 
 	err := utils.CheckDomain(name)
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(400)
+		return
 	}
 
-	host := Ssl(name)
+	host, err := Ssl(name)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
 
 	infoServer := models.InfoServer{}
 	serversAux := []models.Server{}
 	MinGrade := 0
 
-	grades := []string{"F-", "F", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"}
-
 	for _, endpoint := range host.Endpoints {
-		domain := WhoIs(endpoint.IpAddress)
+		domain, err := WhoIs(endpoint.IpAddress)
+		if err != nil {
+			continue
+		}
 		aux := models.Server{}
 		aux.Address = endpoint.IpAddress
-		if endpoint.Grade != "" {
-			aux.Grade = endpoint.Grade
-			for k, v := range grades {
-				if v == endpoint.Grade && (k < MinGrade || MinGrade == 0) {
-					MinGrade = k
-				}
-			}
-		} else {
-			aux.Grade = ""
-		}
+		aux.Grade = endpoint.Grade
+		MinGrade = findMinGrade(endpoint, MinGrade)
 		aux.Country = domain.CountryCode
 		aux.Owner = domain.Org
 		serversAux = append(serversAux, aux)
@@ -96,4 +97,16 @@ func InfoDomain(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
+}
+
+func findMinGrade(endpoint models.Endpoint, minGrade int) int {
+	if endpoint.Grade == "" {
+		return minGrade
+	}
+	for k, v := range grades {
+		if v == endpoint.Grade && (k < minGrade || minGrade == 0) {
+			minGrade = k
+		}
+	}
+	return minGrade
 }

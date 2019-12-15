@@ -8,11 +8,18 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Insert(host string, info models.InfoServer) {
-	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
+var db *sql.DB
+
+func init() {
+	var err error
+	db, err = sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
 	if err != nil {
 		log.Fatal("Error connecting to the DB: ", err)
 	}
+	db.SetMaxOpenConns(10)
+}
+
+func Insert(host string, info models.InfoServer) {
 	stmt, err := db.Prepare("INSERT INTO DOMAIN (host, consulted_time) VALUES ($1, NOW()) RETURNING id;")
 	if err != nil {
 		log.Fatal("Error inserting: ", err)
@@ -25,14 +32,9 @@ func Insert(host string, info models.InfoServer) {
 	} else {
 		InsertInfoServer(info, id)
 	}
-	db.Close()
 }
 
 func InsertInfoServer(info models.InfoServer, id int64) {
-	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
-	if err != nil {
-		log.Fatal("Error connecting to the DB: ", err)
-	}
 	stmt, err := db.Prepare("INSERT INTO INFOSERVER (servers_changed, ssl_grade, previous_ssl_grade, logo, title, is_down, domain_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;")
 	if err != nil {
 		log.Fatal("Error inserting: ", err)
@@ -47,14 +49,9 @@ func InsertInfoServer(info models.InfoServer, id int64) {
 			InsertServer(server, InfoServerId)
 		}
 	}
-	db.Close()
 }
 
 func InsertServer(info models.Server, id int64) {
-	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
-	if err != nil {
-		log.Fatal("Error connecting to the DB: ", err)
-	}
 	stmt, err := db.Prepare("INSERT INTO SERVER (address, ssl_grade, country, owner, infoserver_id) VALUES ($1, $2, $3, $4, $5);")
 	if err != nil {
 		log.Fatal("Error inserting s: ", err)
@@ -65,7 +62,6 @@ func InsertServer(info models.Server, id int64) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.Close()
 }
 
 func FindPreviousGrade(name string) string {
@@ -123,14 +119,11 @@ func FindPreviousServers(name string) []models.Server {
 }
 
 func FindServersRecords() models.ServerRecord {
-	db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/serversinfo?sslmode=disable")
-	if err != nil {
-		log.Fatal("Error connecting to the DB: ", err)
-	}
 	stmt, err := db.Prepare(`SELECT DISTINCT ON (host) host, id
 							FROM DOMAIN
 							GROUP BY host, id
-							ORDER BY host, MAX(consulted_time), id;`)
+							ORDER BY host, MAX(consulted_time), id
+							LIMIT 100;`)
 	if err != nil {
 		log.Fatal("Error in select: ", err)
 	}
@@ -154,7 +147,6 @@ func FindServersRecords() models.ServerRecord {
 		items = append(items, item)
 	}
 	record.Items = items
-	db.Close()
 	return record
 }
 
